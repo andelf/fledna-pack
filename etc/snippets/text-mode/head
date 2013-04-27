@@ -1,0 +1,13 @@
+# -*- coding: utf-8 -*-
+# name: (file header)
+# contributor: andelf <andelf@gmail.com>
+# expand-env: ((yas/indent-line 'fixed) (yas/wrap-around-region 'nil) (cmt-start (if (string-equal comment-end "") (concat comment-start comment-start) comment-start)))
+# --
+`cmt-start` FileName    : `(file-name-nondirectory (buffer-file-name))` `comment-end`
+`cmt-start` Author      : `user-full-name` <`user-mail-address`> `comment-end`
+`cmt-start` Created     : `(current-time-string)` by `user-full-name` `comment-end`
+`cmt-start` Copyright   : ${1:Feather Workshop} (c) `(format-time-string "%Y")` `comment-end`
+`cmt-start` Description : ${2:description} `comment-end`
+`cmt-start` Time-stamp: <> `comment-end`
+
+$0
