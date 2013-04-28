@@ -68,6 +68,7 @@
 (require 'erlang-start)
 (add-to-list 'auto-mode-alist '("\\.app\\.src$" . erlang-mode))
 
+
 (live-add-pack-lib "nitrogen-mode")
 (require 'nitrogen-mode)
 
@@ -94,10 +95,13 @@
 
 (mapc 'yas/load-directory yas/root-directory)
 
+;;; golang
+(require 'go-mode-load)
+(require 'go-autocomplete)
+
 
 ;;; ac modes
 (setq ac-modes (cons 'erlang-mode ac-modes))
 
 ;;; xcscope
-
 (require 'xcscope)
