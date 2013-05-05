@@ -6,6 +6,8 @@
 ;; Load bindings config
 (live-load-config-file "bindings.el")
 
+(add-hook 'before-save-hook 'time-stamp)
+
 ;;; personalized
 (setenv "PATH"
         (concat
