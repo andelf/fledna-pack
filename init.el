@@ -18,6 +18,8 @@
 
 (set-default-font "-apple-Monaco-medium-normal-normal-*-*-*-*-*-m-0-iso10646-1")
 
+;;; fuck u for zone xxx
+(setq live-disable-zone t)
 
 ;; cursor not blink
 (blink-cursor-mode -1)
