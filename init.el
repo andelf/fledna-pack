@@ -94,6 +94,18 @@
 (require 'erlang-flymake)
 
 
+(defun my-find-rebar-root ()
+  (let ((dir (locate-dominating-file default-directory "rebar")))
+    (or dir default-directory)))
+(defun my-inferior-erlang-compile ()
+  (interactive)
+  (let ((default-directory (my-find-rebar-root)))
+    (compile "./rebar compile")))
+
+(defun my-erlang-mode-hook () (local-set-key [f9] 'my-inferior-erlang-compile))
+(add-hook 'erlang-mode-hook 'my-erlang-mode-hook)
+
+
 (live-add-pack-lib "nitrogen-mode")
 (require 'nitrogen-mode)
 
