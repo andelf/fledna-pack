@@ -1,0 +1,9 @@
+# -*- coding: utf-8 -*-
+# name: erlnif
+# contributor: Andelf
+# --
+static ERL_NIF_TERM ${1:func_name}_nif(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
+{
+    $0
+    return enif_make_atom(env, "ok");
+}
