@@ -147,6 +147,8 @@
 ;;; xcscope
 (require 'xcscope)
 
+(require 'elixir-mode)
+
 ;;; imenu
 
 
