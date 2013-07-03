@@ -2776,5 +2776,5 @@ This is an exact copy of `line-number-at-pos' for use in emacs21."
 
 
 (provide 'markdown-mode)
-
+(provide 'gfm-mode)
 ;;; markdown-mode.el ends here

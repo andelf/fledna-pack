@@ -116,7 +116,8 @@
 (live-add-pack-lib "zotonic-tpl-mode")
 (require 'zotonic-tpl-mode)
 
-(require 'markdown-mode)
+(live-add-pack-lib "gfm-mode")
+(require 'gfm-mode)
 (add-to-list 'auto-mode-alist '("\\.md$" . gfm-mode))
 
 (menu-bar-mode t)
