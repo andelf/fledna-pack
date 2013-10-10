@@ -63,7 +63,6 @@
 (require 'go-mode-load)
 ;;; gocode
 (add-to-list 'load-path "/usr/local/Cellar/go/1.0.3/src/pkg/github.com/nsf/gocode/emacs")
-                                        ;(require 'go-autocomplete)
 (require 'go-autocomplete)
 (require 'auto-complete-config)
 
@@ -123,18 +122,17 @@
 (menu-bar-mode t)
 
 ; (live-add-pack-lib "haskell-mode")
-(load "~/.live-packs/fledna-pack/lib/haskell-mode/haskell-site-file")
+(live-add-pack-lib "haskell-mode")
+(require 'haskell-mode-autoloads)
 (add-hook 'haskell-mode-hook 'turn-on-haskell-doc-mode)
-(add-hook 'haskell-mode-hook 'turn-on-haskell-indentation)
-;;(add-hook 'haskell-mode-hook 'turn-on-haskell-indent)
+;;(add-hook 'haskell-mode-hook 'turn-on-haskell-indentation)
+(add-hook 'haskell-mode-hook 'turn-on-haskell-indent)
 ;;(add-hook 'haskell-mode-hook 'turn-on-haskell-simple-indent)
 
 ;;; yasinppet
 (setq yas-prompt-functions
       '(yas-dropdown-prompt yas-ido-prompt yas-x-prompt yas-completing-prompt yas-no-prompt))
-
 (setq yas/root-directory (cons "~/.live-packs/fledna-pack/etc/snippets" yas/root-directory))
-
 (mapc 'yas/load-directory yas/root-directory)
 
 ;;; golang
@@ -143,13 +141,14 @@
 
 
 ;;; ac modes
-(setq ac-modes (cons 'erlang-mode ac-modes))
+(add-to-list 'ac-modes 'erlang-mode)
+(add-to-list 'ac-modes 'rust-mode)
+(add-to-list 'ac-modes 'go-mode)
 
 ;;; xcscope
 (require 'xcscope)
 
 (require 'elixir-mode)
-
 ;;; imenu
 
 

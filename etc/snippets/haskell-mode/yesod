@@ -1,0 +1,10 @@
+# -*- mode: snippet -*-
+# name: yesod header
+# key: yesod
+# type: command
+# --
+
+{-# LANGUAGE TypeFamilies, QuasiQuotes, MultiParamTypeClasses,
+TemplateHaskell, OverloadedStrings #-}
+
+$0
