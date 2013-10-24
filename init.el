@@ -129,6 +129,18 @@
 (add-hook 'haskell-mode-hook 'turn-on-haskell-indent)
 ;;(add-hook 'haskell-mode-hook 'turn-on-haskell-simple-indent)
 
+(live-add-pack-lib "hamlet-mode")
+(require 'hamlet-mode)
+(add-hook 'html-mode-hook
+  (lambda ()
+    ;; Default indentation is usually 2 spaces, changing to 4.
+    (set (make-local-variable 'sgml-basic-offset) 2)
+    (set (make-local-variable 'tab-width) 2)
+    ))
+
+;;; lua-mode
+(require 'lua-mode)
+
 ;;; yasinppet
 (setq yas-prompt-functions
       '(yas-dropdown-prompt yas-ido-prompt yas-x-prompt yas-completing-prompt yas-no-prompt))
@@ -139,11 +151,11 @@
 (require 'go-mode-load)
 (require 'go-autocomplete)
 
-
 ;;; ac modes
 (add-to-list 'ac-modes 'erlang-mode)
 (add-to-list 'ac-modes 'rust-mode)
 (add-to-list 'ac-modes 'go-mode)
+(add-to-list 'ac-modes 'lua-mode)
 
 ;;; xcscope
 (require 'xcscope)
