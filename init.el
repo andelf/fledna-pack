@@ -28,7 +28,8 @@
 (setq display-time-format "%m/%d %H:%M")
 (setq display-time-24hr-format t)
 (display-time)
-(display-battery-mode t)
+(or (eq system-type 'darwin)
+    (display-battery-mode t))
 
 
 ;;; temp
