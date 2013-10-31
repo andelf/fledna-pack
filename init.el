@@ -28,9 +28,9 @@
 (setq display-time-format "%m/%d %H:%M")
 (setq display-time-24hr-format t)
 (display-time)
-(or (eq system-type 'darwin)
-    (display-battery-mode t))
-
+;; (or (eq system-type 'darwin)
+;;     (display-battery-mode t))
+(display-battery-mode -1)
 
 ;;; temp
 (global-set-key (kbd "C-x C-b") 'electric-buffer-list)
@@ -49,7 +49,7 @@
         (propertize
          (format (let ((w (length (number-to-string
                                    (count-lines (point-min) (point-max))))))
-                   (concat "%4d |")) line) 'face 'linum)))
+                   (concat "%4d  |")) line) 'face 'linum)))
 (defun my-linum-on ()    ; linum should turn off in non-editor buffer
   (unless (or (minibufferp)
               (equal frame-title-format "Speedbar 1.0")
@@ -163,7 +163,7 @@
 
 (require 'elixir-mode)
 ;;; imenu
-
+;;; C-x C-i
 
 ;;; speedbar
 ;; (defconst my-speedbar-buffer-name "SPEEDBAR")
