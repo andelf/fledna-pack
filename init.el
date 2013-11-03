@@ -15,8 +15,18 @@
          (concat (live-pack-dir 'fledna-pack) "bin") ":"
          (getenv "PATH")))
 
-
 (set-default-font "-apple-Monaco-medium-normal-normal-*-*-*-*-*-m-0-iso10646-1")
+
+;;; pbcopy & pbpaste for Emacs
+(defun copy-from-osx ()
+  (shell-command-to-string "pbpaste"))
+(defun paste-to-osx (text &optional push)
+  (let ((process-connection-type nil))
+    (let ((proc (start-process "pbcopy" "*Messages*" "pbcopy")))
+      (process-send-string proc text)
+      (process-send-eof proc))))
+(setq interprogram-cut-function 'paste-to-osx)
+(setq interprogram-paste-function 'copy-from-osx)
 
 ;;; fuck u for zone xxx
 (setq live-disable-zone t)
@@ -49,7 +59,7 @@
         (propertize
          (format (let ((w (length (number-to-string
                                    (count-lines (point-min) (point-max))))))
-                   (concat "%4d  |")) line) 'face 'linum)))
+                   (concat "%4d |")) line) 'face 'linum)))
 (defun my-linum-on ()    ; linum should turn off in non-editor buffer
   (unless (or (minibufferp)
               (equal frame-title-format "Speedbar 1.0")
@@ -71,9 +81,7 @@
 (live-add-pack-lib "erlang-mode")
 (require 'erlang-start)
 (add-to-list 'auto-mode-alist '("\\.app\\.src$" . erlang-mode))
-;; (add-to-list 'load-path "/Users/wangshuyu/Repos/distel/elisp")
-;; (require 'distel)
-;; (distel-setup)
+
 (setq erlang-root-dir "/usr/local/Cellar/erlang/R16B/")
 (setq erlang-man-root-dir "/usr/local/Cellar/erlang/R16B/share/man/")
 
@@ -94,7 +102,6 @@
 ;;; erlang flymake
 (require 'flymake)
 (require 'erlang-flymake)
-
 
 (defun my-find-rebar-root ()
   (let ((dir (locate-dominating-file default-directory "rebar")))
