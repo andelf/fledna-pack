@@ -1,0 +1,17 @@
+# name: imports
+# expand-env: ((yas/indent-line 'fixed) (yas/wrap-around-region 'nil))
+# --
+import qualified Data.ByteString as B
+import qualified Data.ByteString.Lazy.Char8 as BL
+import qualified Data.Text as T
+import qualified Data.Text.Lazy as TL
+import qualified Data.Text.Encoding as TE
+import qualified Data.Text.Lazy.Encoding as TLE
+import qualified Data.Text.IO as TIO
+import qualified Data.Text.Lazy.IO as TLIO
+import qualified Data.Map as M
+import           Control.Monad (liftM)
+import           Control.Applicative ((<$>), (<*>), empty)
+import           Data.Monoid ((<>), mempty, mconcat, mappend)
+
+$0
