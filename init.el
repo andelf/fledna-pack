@@ -38,6 +38,8 @@
 (setq display-time-format "%m/%d %H:%M")
 (setq display-time-24hr-format t)
 (display-time)
+(if (eq system-type 'darwin)
+    (setq ns-use-native-fullscreen nil))
 ;; (or (eq system-type 'darwin)
 ;;     (display-battery-mode t))
 (display-battery-mode -1)
