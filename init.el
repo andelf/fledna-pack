@@ -16,17 +16,18 @@
          (getenv "PATH")))
 
 (set-default-font "-apple-Monaco-medium-normal-normal-*-*-*-*-*-m-0-iso10646-1")
-
 ;;; pbcopy & pbpaste for Emacs
-(defun copy-from-osx ()
-  (shell-command-to-string "pbpaste"))
-(defun paste-to-osx (text &optional push)
-  (let ((process-connection-type nil))
-    (let ((proc (start-process "pbcopy" "*Messages*" "pbcopy")))
-      (process-send-string proc text)
-      (process-send-eof proc))))
-(setq interprogram-cut-function 'paste-to-osx)
-(setq interprogram-paste-function 'copy-from-osx)
+(unless (not (eq system-type 'darwin))
+  (defun copy-from-osx ()
+    (shell-command-to-string "pbpaste"))
+  (defun paste-to-osx (text &optional push)
+    (let ((process-connection-type nil))
+      (let ((proc (start-process "pbcopy" "*Messages*" "pbcopy")))
+        (process-send-string proc text)
+        (process-send-eof proc))))
+  (setq interprogram-cut-function 'paste-to-osx)
+  (setq interprogram-paste-function 'copy-from-osx)
+  )
 
 ;;; fuck u for zone xxx
 (setq live-disable-zone t)
@@ -138,6 +139,13 @@
 ;;(add-hook 'haskell-mode-hook 'turn-on-haskell-indentation)
 (add-hook 'haskell-mode-hook 'turn-on-haskell-indent)
 ;;(add-hook 'haskell-mode-hook 'turn-on-haskell-simple-indent)
+
+(add-hook 'haskell-mode-hook
+  (lambda ()
+    ;; Default indentation is usually 2 spaces, changing to 4.
+    (set (make-local-variable 'tab-width) 2)
+    ))
+
 
 (live-add-pack-lib "hamlet-mode")
 (require 'hamlet-mode)
