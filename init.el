@@ -15,9 +15,10 @@
          (concat (live-pack-dir 'fledna-pack) "bin") ":"
          (getenv "PATH")))
 
+
 (set-default-font "-apple-Monaco-medium-normal-normal-*-*-*-*-*-m-0-iso10646-1")
 ;;; pbcopy & pbpaste for Emacs
-(unless (not (eq system-type 'darwin))
+(when (and (eq system-type 'darwin) (not window-system))
   (defun copy-from-osx ()
     (shell-command-to-string "pbpaste"))
   (defun paste-to-osx (text &optional push)
