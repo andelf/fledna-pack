@@ -4,7 +4,7 @@
 ;; See README for more information.
 
 ;; Load bindings config
-(live-load-config-file "bindings.el")
+;(live-load-config-file "bindings.el")
 
 (add-hook 'before-save-hook 'time-stamp)
 
@@ -74,10 +74,10 @@
 
 
 ;;; golang
-(add-to-list 'load-path "/usr/local/Cellar/go/1.0.3/misc/emacs")
+(add-to-list 'load-path "/usr/local/Cellar/go/1.2/misc/emacs")
 (require 'go-mode-load)
 ;;; gocode
-(add-to-list 'load-path "/usr/local/Cellar/go/1.0.3/src/pkg/github.com/nsf/gocode/emacs")
+(add-to-list 'load-path "/usr/local/Cellar/go/1.2/src/pkg/github.com/nsf/gocode/emacs")
 (require 'go-autocomplete)
 (require 'auto-complete-config)
 
