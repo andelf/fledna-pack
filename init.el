@@ -5,6 +5,11 @@
 
 ;; Load bindings config
 ;(live-load-config-file "bindings.el")
+(setq user-mail-address "andelf@gmail.com")
+(setq user-full-name "Wang ShuYu")
+(setq user-name-chn "王淑羽")
+(setq user-id "20073034")
+(setq user-login-name "andelf")
 
 (add-hook 'before-save-hook 'time-stamp)
 
@@ -159,6 +164,9 @@
 
 ;;; lua-mode
 (require 'lua-mode)
+
+;;; rust-mode
+(require 'rust-mode)
 
 ;;; yasinppet
 (setq yas-prompt-functions
