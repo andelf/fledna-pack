@@ -1,0 +1,10 @@
+# -*- coding: utf-8 -*-
+# name: fromstr
+# contributor: andelf <andelf@gmail.com>
+# expand-env: ((yas/indent-line 'fixed) (yas/wrap-around-region 'nil))
+# --
+impl FromStr for ${1:T} {
+    fn from_str(s: &str) -> Option<$1> {
+        ${0:unimplemented!()}
+    }
+}

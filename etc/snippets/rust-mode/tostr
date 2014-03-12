@@ -1,0 +1,10 @@
+# -*- coding: utf-8 -*-
+# name: tostr
+# contributor: andelf <andelf@gmail.com>
+# expand-env: ((yas/indent-line 'fixed) (yas/wrap-around-region 'nil))
+# --
+impl ToStr for ${1:T} {
+    fn to_str(&self) -> ~str {
+        ${0:unimplemented!()}
+    }
+}
