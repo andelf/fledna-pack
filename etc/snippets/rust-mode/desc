@@ -3,7 +3,7 @@
 # contributor: andelf <andelf@gmail.com>
 # expand-env: ((yas/indent-line 'fixed) (yas/wrap-around-region 'nil) (cmt-start (if (string-equal comment-end "") (concat comment-start comment-start) comment-start)))
 # --
-#[desc = "${1:A hello world Rust package.}"];
-#[license = "MIT"];
+#![desc = "${1:A hello world Rust package.}"]
+#![license = "MIT"]
 
 $0
