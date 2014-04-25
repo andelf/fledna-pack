@@ -1,0 +1,21 @@
+# -*- coding: utf-8 -*-
+# name: syntax_ext
+# contributor: andelf <andelf@gmail.com>
+# expand-env:
+# --
+#![feature(macro_registrar, managed_boxes, quote)]
+
+extern crate syntax;
+
+use syntax::ast;
+use syntax::codemap;
+use syntax::ext::base;
+use syntax::parse::token;
+
+
+#[macro_registrar]
+pub fn registrar(register: |ast::Name, base::SyntaxExtension|) {
+    register(token::intern("your_ext_name"), base::ItemModifier(foo));
+}
+
+$0
