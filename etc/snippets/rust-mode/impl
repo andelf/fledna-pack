@@ -1,0 +1,9 @@
+# -*- coding: utf-8 -*-
+# name: impl
+# contributor: andelf <andelf@gmail.com>
+# --
+impl ${1:T} {
+    fn new() -> $1 {
+        $1 { $0 }
+    }
+}

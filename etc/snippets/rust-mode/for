@@ -1,0 +1,7 @@
+# -*- coding: utf-8 -*-
+# name: for
+# contributor: andelf <andelf@gmail.com>
+# --
+for ${1:i} in ${2:range(0, ${3:size})} {
+    $0
+}

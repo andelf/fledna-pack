@@ -1,0 +1,7 @@
+# -*- coding: utf-8 -*-
+# name: implf
+# contributor: andelf <andelf@gmail.com>
+# --
+impl ${1:Drop} for ${2:T} {
+    $0
+}

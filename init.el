@@ -6,8 +6,7 @@
 ;; Load bindings config
 ;(live-load-config-file "bindings.el")
 (setq user-mail-address "andelf@gmail.com")
-(setq user-full-name "Wang ShuYu")
-(setq user-name-chn "王淑羽")
+(setq user-full-name "ShuYu Wang")
 (setq user-id "20073034")
 (setq user-login-name "andelf")
 
@@ -22,6 +21,7 @@
 
 
 (set-default-font "-apple-Monaco-medium-normal-normal-*-*-*-*-*-m-0-iso10646-1")
+;(set-frame-font "-*-Source Sans Pro-light-normal-normal-*-*-*-*-14-p-0-iso10646-1")
 ;;; pbcopy & pbpaste for Emacs
 (when (and (eq system-type 'darwin) (not window-system))
   (defun copy-from-osx ()
@@ -50,6 +50,8 @@
 ;; (or (eq system-type 'darwin)
 ;;     (display-battery-mode t))
 (display-battery-mode -1)
+;;; cursor big bay
+(setq cursor-type '(bar . 10))
 
 ;;; temp
 (global-set-key (kbd "C-x C-b") 'electric-buffer-list)
@@ -91,8 +93,10 @@
 (require 'erlang-start)
 (add-to-list 'auto-mode-alist '("\\.app\\.src$" . erlang-mode))
 
-(setq erlang-root-dir "/usr/local/Cellar/erlang/R16B/")
-(setq erlang-man-root-dir "/usr/local/Cellar/erlang/R16B/share/man/")
+(when (eq system-type 'darwin)
+  (setq erlang-root-dir "/usr/local/Cellar/erlang/R16B/")
+  (setq erlang-man-root-dir "/usr/local/Cellar/erlang/R16B/share/man/")
+  )
 
 ;; prevent annoying hang-on-compile
 (defvar inferior-erlang-prompt-timeout t)
@@ -138,7 +142,7 @@
 
 (menu-bar-mode t)
 
-; (live-add-pack-lib "haskell-mode")
+;;; haskell
 (live-add-pack-lib "haskell-mode")
 (require 'haskell-mode-autoloads)
 (add-hook 'haskell-mode-hook 'turn-on-haskell-doc-mode)
@@ -167,6 +171,14 @@
 
 ;;; rust-mode
 (require 'rust-mode)
+(add-hook 'rust-mode
+          (lambda ()
+            ;; Default indentation is usually 2 spaces, changing to 4.
+            (add-to-list 'ac-sources 'ac-source-files-in-current-dir)
+            (electric-pair-mode t)
+            (setq ac-omni-completion-sources
+                  '(("\\." ac-sources)
+                    ("::" ac-sources)))))
 
 ;;; yasinppet
 (setq yas-prompt-functions
@@ -184,6 +196,14 @@
 (add-to-list 'ac-modes 'go-mode)
 (add-to-list 'ac-modes 'lua-mode)
 
+(define-key ac-mode-map (kbd "M-TAB") 'auto-complete)
+(setq ac-auto-start 3)
+(define-key ac-completing-map "\M-/" 'ac-stop)
+(define-key ac-completing-map "\t" 'ac-complete)
+;;; Ignore case if completion target string doesn't include upper characters
+(setq ac-ignore-case 'smart)
+
+
 ;;; xcscope
 (require 'xcscope)
 
@@ -198,6 +218,7 @@
 (speedbar-add-supported-extension ".js")
 (speedbar-add-supported-extension ".erl")
 (speedbar-add-supported-extension ".dtl")
+(speedbar-add-supported-extension ".rs")
 (defconst my-speedbar-buffer-name " SPEEDBAR")
 (defun my-speedbar-no-separate-frame ()
   (interactive)
