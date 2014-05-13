@@ -197,7 +197,7 @@
 (add-to-list 'ac-modes 'lua-mode)
 
 (define-key ac-mode-map (kbd "M-TAB") 'auto-complete)
-(setq ac-auto-start 3)
+;;(setq ac-auto-start 2)
 (define-key ac-completing-map "\M-/" 'ac-stop)
 (define-key ac-completing-map "\t" 'ac-complete)
 ;;; Ignore case if completion target string doesn't include upper characters
