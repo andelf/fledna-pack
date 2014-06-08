@@ -19,8 +19,8 @@
          (concat (live-pack-dir 'fledna-pack) "bin") ":"
          (getenv "PATH")))
 
-
-(set-default-font "-apple-Monaco-medium-normal-normal-*-*-*-*-*-m-0-iso10646-1")
+(live-set-default-darwin-font "Monaco-12")
+;;(set-default-font "-apple-Monaco-medium-normal-normal-*-*-*-*-*-m-0-iso10646-1")
 ;(set-frame-font "-*-Source Sans Pro-light-normal-normal-*-*-*-*-14-p-0-iso10646-1")
 ;;; pbcopy & pbpaste for Emacs
 (when (and (eq system-type 'darwin) (not window-system))
@@ -46,7 +46,7 @@
 (setq display-time-24hr-format t)
 (display-time)
 (if (eq system-type 'darwin)
-    (setq ns-use-native-fullscreen nil))
+    (setq ns-use-native-fullscreen t))
 ;; (or (eq system-type 'darwin)
 ;;     (display-battery-mode t))
 (display-battery-mode -1)
@@ -79,6 +79,8 @@
 (define-globalized-minor-mode my-global-linum-mode linum-mode my-linum-on)
 (my-global-linum-mode 1)
 
+;;; rust
+(live-load-config-file "rust-conf.el")
 
 ;;; golang
 (add-to-list 'load-path "/usr/local/Cellar/go/1.2/misc/emacs")
@@ -98,6 +100,10 @@
   (setq erlang-man-root-dir "/usr/local/Cellar/erlang/R16B/share/man/")
   )
 
+;;; swift
+(require 'swift-mode)
+
+
 ;; prevent annoying hang-on-compile
 (defvar inferior-erlang-prompt-timeout t)
 ;; default node name to emacs@localhost
@@ -110,7 +116,8 @@
         ;; Mac OS X uses "name.local" instead of "name", this should work
         ;; pretty much anywhere without having to muck with NetInfo
         ;; ... but I only tested it on Mac OS X.
-        (car (split-string (shell-command-to-string "hostname"))))))
+        (car (split-string
+              (shell-command-to-string "hostname"))))))
 
 ;;; erlang flymake
 (require 'flymake)
@@ -143,12 +150,12 @@
 (menu-bar-mode t)
 
 ;;; haskell
-(live-add-pack-lib "haskell-mode")
-(require 'haskell-mode-autoloads)
-(add-hook 'haskell-mode-hook 'turn-on-haskell-doc-mode)
-;;(add-hook 'haskell-mode-hook 'turn-on-haskell-indentation)
-(add-hook 'haskell-mode-hook 'turn-on-haskell-indent)
-;;(add-hook 'haskell-mode-hook 'turn-on-haskell-simple-indent)
+;; (live-add-pack-lib "haskell-mode")
+;; (require 'haskell-mode-autoloads)
+;; (add-hook 'haskell-mode-hook 'turn-on-haskell-doc-mode)
+;; ;;(add-hook 'haskell-mode-hook 'turn-on-haskell-indentation)
+;; (add-hook 'haskell-mode-hook 'turn-on-haskell-indent)
+;; ;;(add-hook 'haskell-mode-hook 'turn-on-haskell-simple-indent)
 
 (add-hook 'haskell-mode-hook
   (lambda ()
@@ -168,17 +175,6 @@
 
 ;;; lua-mode
 (require 'lua-mode)
-
-;;; rust-mode
-(require 'rust-mode)
-(add-hook 'rust-mode
-          (lambda ()
-            ;; Default indentation is usually 2 spaces, changing to 4.
-            (add-to-list 'ac-sources 'ac-source-files-in-current-dir)
-            (electric-pair-mode t)
-            (setq ac-omni-completion-sources
-                  '(("\\." ac-sources)
-                    ("::" ac-sources)))))
 
 ;;; yasinppet
 (setq yas-prompt-functions
