@@ -100,8 +100,18 @@
   (setq erlang-man-root-dir "/usr/local/Cellar/erlang/R16B/share/man/")
   )
 
+
 ;;; swift
+(add-to-list 'ac-dictionary-directories "~/.live-packs/fledna-pack/etc/ac-dict")
 (require 'swift-mode)
+(add-hook 'swift-mode-hook
+          #'(lambda ()
+            ;; Default indentation is usually 2 spaces, changing to 4.
+            (add-to-list 'ac-sources 'ac-source-files-in-current-dir)
+            (electric-pair-mode t)
+            (add-to-list 'ac-sources 'ac-source-rust)
+            ))
+
 
 
 ;; prevent annoying hang-on-compile
@@ -191,6 +201,7 @@
 (add-to-list 'ac-modes 'rust-mode)
 (add-to-list 'ac-modes 'go-mode)
 (add-to-list 'ac-modes 'lua-mode)
+(add-to-list 'ac-modes 'swift-mode)
 
 (define-key ac-mode-map (kbd "M-TAB") 'auto-complete)
 ;;(setq ac-auto-start 2)
