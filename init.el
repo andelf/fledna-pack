@@ -109,7 +109,7 @@
             ;; Default indentation is usually 2 spaces, changing to 4.
             (add-to-list 'ac-sources 'ac-source-files-in-current-dir)
             (electric-pair-mode t)
-            (add-to-list 'ac-sources 'ac-source-rust)
+            ;; (add-to-list 'ac-sources 'ac-source-rust)
             ))
 
 
