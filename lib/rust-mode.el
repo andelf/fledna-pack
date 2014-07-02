@@ -2,7 +2,7 @@
 
 ;; Version: 0.2.0
 ;; Author: Mozilla
-;; Url: https://github.com/mozilla/rust
+;; Url: https://github.com/rust-lang/rust
 ;; Keywords: languages
 
 ;;; Commentary:
@@ -212,12 +212,12 @@
      ;; Special types
      (,(regexp-opt rust-special-types 'words) . font-lock-type-face)
 
-     ;; Attributes like `#[bar(baz)]` or `#![bar(baz)]`
-     (,(rust-re-grab (concat "#\\!?[" rust-re-ident "[^]]*\\]"))
-      1 font-lock-preprocessor-face)
+     ;; Attributes like `#[bar(baz)]` or `#![bar(baz)]` or `#[bar = "baz"]`
+     (,(rust-re-grab (concat "#\\!?\\[" rust-re-ident "[^]]*\\]"))
+      1 font-lock-preprocessor-face keep)
 
      ;; Syntax extension invocations like `foo!`, highlight including the !
-     (,(concat (rust-re-grab (concat rust-re-ident "!")) "[({[:space:]]")
+     (,(concat (rust-re-grab (concat rust-re-ident "!")) "[({[:space:][]")
       1 font-lock-preprocessor-face)
 
      ;; Field names like `foo:`, highlight excluding the :
