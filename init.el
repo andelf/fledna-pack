@@ -100,7 +100,6 @@
   (setq erlang-man-root-dir "/usr/local/Cellar/erlang/R16B/share/man/")
   )
 
-
 ;;; swift
 (defun swift-mode:indent-on-parentheses ()
   (when (and (equal mode-name "Swift")
@@ -108,13 +107,33 @@
              (char-syntax last-command-event)
              (= (char-syntax (char-before)) ?\{)
              t)
-
     (newline)
     (insert "}")
     (indent-according-to-mode)
     (backward-char)
     (newline)
     (indent-according-to-mode)))
+
+;; (or (string= (string (char-before)) ")")
+(defun my-swift-brace ()
+  (interactive "*")
+  (if (or (string= (string (char-before)) "(")
+          (nth 8 (syntax-ppss))
+          (not (eolp)))
+      (insert "{")
+
+    (progn
+      (when (not (string= (string (char-before)) " "))
+        (insert " "))
+      (let ((blink-matching-paren nil)
+            (electric-pair-mode nil))
+        (insert "{")
+        (newline-and-indent)
+        (newline-and-indent)
+        (insert "}")
+        (indent-according-to-mode)
+        (previous-line)
+        (indent-according-to-mode)))))
 
 (add-to-list 'ac-dictionary-directories "~/.live-packs/fledna-pack/etc/ac-dict")
 (require 'swift-mode)
@@ -124,9 +143,11 @@
   (electric-indent-mode t)
   ;; (add-hook 'post-self-insert-hook
           ;;;  'swift-mode:indent-on-parentheses)
-  (set (make-local-variable 'electric-indent-chars) '(?\n ?\:)))
+  (local-set-key (kbd "{") 'my-swift-brace)
+  (set (make-local-variable 'electric-indent-chars) '(?\n ?\: ?\{)))
 
 (add-hook 'swift-mode-hook 'my-swift-mode-hook)
+
 
 ;; prevent annoying hang-on-compile
 (defvar inferior-erlang-prompt-timeout t)
