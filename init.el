@@ -102,17 +102,31 @@
 
 
 ;;; swift
+(defun swift-mode:indent-on-parentheses ()
+  (when (and (equal mode-name "Swift")
+             (eq (char-before) last-command-event)
+             (char-syntax last-command-event)
+             (= (char-syntax (char-before)) ?\{)
+             t)
+
+    (newline)
+    (insert "}")
+    (indent-according-to-mode)
+    (backward-char)
+    (newline)
+    (indent-according-to-mode)))
+
 (add-to-list 'ac-dictionary-directories "~/.live-packs/fledna-pack/etc/ac-dict")
 (require 'swift-mode)
-(add-hook 'swift-mode-hook
-          #'(lambda ()
-            ;; Default indentation is usually 2 spaces, changing to 4.
-            (add-to-list 'ac-sources 'ac-source-files-in-current-dir)
-            (electric-pair-mode t)
-            ;; (add-to-list 'ac-sources 'ac-source-rust)
-            ))
+(defun my-swift-mode-hook ()
+  (add-to-list 'ac-sources 'ac-source-files-in-current-dir)
+  (electric-pair-mode t)
+  (electric-indent-mode t)
+  ;; (add-hook 'post-self-insert-hook
+          ;;;  'swift-mode:indent-on-parentheses)
+  (set (make-local-variable 'electric-indent-chars) '(?\n ?\:)))
 
-
+(add-hook 'swift-mode-hook 'my-swift-mode-hook)
 
 ;; prevent annoying hang-on-compile
 (defvar inferior-erlang-prompt-timeout t)
