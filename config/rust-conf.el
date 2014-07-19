@@ -41,6 +41,7 @@
             (add-to-list 'ac-sources 'ac-source-files-in-current-dir)
             (electric-pair-mode t)
             (local-set-key (kbd "C-S-j") 'my-rust-newline-and-indent)
+            (local-set-key (kbd "{") 'my-swift-brace)
             (electric-pair-mode t)
             (add-to-list 'ac-sources 'ac-source-rust)
             ;(add-to-list 'ac-sources 'ac-source-racer)
