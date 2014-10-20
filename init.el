@@ -55,7 +55,7 @@
 
 ;;; temp
 (global-set-key (kbd "C-x C-b") 'electric-buffer-list)
-(global-set-key (kbd "<C-tab>") 'other-window)
+;;(global-set-key (kbd "<C-tab>") 'other-window)
 ;; make C-c C-c and C-c C-u work for comment/uncomment region in all modes
 (global-set-key (kbd "C-c c") 'comment-region)
 (global-set-key (kbd "C-c u") 'uncomment-region)
@@ -246,7 +246,7 @@
 ;;; Ignore case if completion target string doesn't include upper characters
 (setq ac-ignore-case 'smart)
 
-(define-key ac-complete-mode-map "<return>"   'nil)
+;;(define-key ac-complete-mode-map "<return>"   'nil)
 (define-key ac-complete-mode-map "RET"        'nil)
 
 
