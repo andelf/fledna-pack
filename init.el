@@ -209,6 +209,7 @@
     (set (make-local-variable 'tab-width) 2)
     ))
 
+;; (electric-indent-mode t)
 
 (live-add-pack-lib "hamlet-mode")
 (require 'hamlet-mode)
