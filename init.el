@@ -12,6 +12,9 @@
 
 (add-hook 'before-save-hook 'time-stamp)
 
+;;; max buffer menu name
+(setq Buffer-menu-name-width 40)
+
 ;;; personalized
 (setenv "PATH"
         (concat
