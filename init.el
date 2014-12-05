@@ -235,6 +235,10 @@
 (require 'go-mode-load)
 (require 'go-autocomplete)
 
+;;; ess
+(add-to-list 'load-path "/Users/wangshuyu/.live-packs/fledna-pack/lib/ess-14.09/lisp")
+(load "ess-site")
+
 ;;; ac modes
 (add-to-list 'ac-modes 'erlang-mode)
 (add-to-list 'ac-modes 'rust-mode)
