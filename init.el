@@ -212,6 +212,12 @@
     (set (make-local-variable 'tab-width) 2)
     ))
 
+(add-hook 'js2-mode-hook
+  (lambda ()
+    ;; Default indentation is usually 2 spaces, changing to 4.
+    (set (make-local-variable 'tab-width) 2)
+    ))
+
 
 (live-add-pack-lib "hamlet-mode")
 (require 'hamlet-mode)
@@ -234,6 +240,11 @@
 ;;; golang
 (require 'go-mode-load)
 (require 'go-autocomplete)
+(add-hook 'go-mode-hook
+          (lambda ()
+            (add-hook 'before-save-hook 'gofmt-before-save)
+            (setq tab-width 4)
+            (setq indent-tabs-mode 1)))
 
 ;;; ess
 (add-to-list 'load-path "/Users/wangshuyu/.live-packs/fledna-pack/lib/ess-14.09/lisp")
@@ -298,3 +309,7 @@
                      (get-buffer my-speedbar-buffer-name)))
 
 (global-set-key (kbd "C-x C-m") 'my-speedbar-no-separate-frame)
+
+;;; set fill column
+(setq-default fill-column 120)
+(global-set-key (kbd "C-c C-k") 'compile)
