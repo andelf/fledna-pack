@@ -4,7 +4,7 @@
 ;; See README for more information.
 
 ;; Load bindings config
-;(live-load-config-file "bindings.el")
+(live-load-config-file "bindings.el")
 (setq user-mail-address "andelf@gmail.com")
 (setq user-full-name "ShuYu Wang")
 (setq user-id "20073034")
@@ -80,10 +80,13 @@
               (equal (string-match "\\*.*\\*" (buffer-name)) 0))
     (linum-mode 1)))
 (define-globalized-minor-mode my-global-linum-mode linum-mode my-linum-on)
-(my-global-linum-mode 1)
+;; (my-global-linum-mode 1)
 
 ;;; rust
 (live-load-config-file "rust-conf.el")
+
+;;;
+(live-load-config-file "compile-conf.el")
 
 ;;; golang
 (add-to-list 'load-path "/usr/local/Cellar/go/1.2/misc/emacs")
@@ -272,6 +275,11 @@
 (require 'xcscope)
 
 (require 'elixir-mode)
+(add-hook 'elixir-mode-hook
+          (lambda ()
+            (setq tab-width 2)
+            (setq default-tab-width 2)))
+
 ;;; imenu
 ;;; C-x C-i
 
@@ -312,4 +320,8 @@
 
 ;;; set fill column
 (setq-default fill-column 120)
-(global-set-key (kbd "C-c C-k") 'compile)
+
+(when (window-system)
+  (set-frame-height (selected-frame) 48)
+  (set-frame-width (selected-frame) 120)
+  (set-frame-position (selected-frame) 0 0))

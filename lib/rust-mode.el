@@ -735,7 +735,7 @@ This is written mainly to be used as `end-of-defun-function' for Rust."
 ;; regexp (which is broken on a few edge cases), add our own 'rust
 ;; compilation error regexp and use it instead.
 (defvar rustc-compilation-regexps
-  (let ((file "\\([^\n]+\\)")
+  (let ((file "\\([^<\n]+\\.rs\\)")
         (start-line "\\([0-9]+\\)")
         (start-col  "\\([0-9]+\\)")
         (end-line   "\\([0-9]+\\)")
@@ -743,7 +743,7 @@ This is written mainly to be used as `end-of-defun-function' for Rust."
         (error-or-warning "\\(?:[Ee]rror\\|\\([Ww]arning\\)\\)"))
     (let ((re (concat "^" file ":" start-line ":" start-col
                       ": " end-line ":" end-col
-                      " \\(?:[Ee]rror\\|\\([Ww]arning\\)\\):")))
+                      " \\(?:[Ee]rror\\|\\([Ww]arning\\)|\\([Nn]ote\\)\\):")))
       (cons re '(1 (2 . 4) (3 . 5) (6)))))
   "Specifications for matching errors in rustc invocations.
 See `compilation-error-regexp-alist for help on their format.")

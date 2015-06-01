@@ -1,3 +1,10 @@
+;; FileName    : racer-autocomplete.el
+;; Author      : ShuYu Wang <andelf@gmail.com>
+;; Created     : Wed May 20 10:08:03 2015 by ShuYu Wang
+;; Copyright   : Feather Workshop (c) 2015
+;; Description : racer auto-complete source
+;; Time-stamp: <2015-05-20 10:08:18 andelf>
+
 ;;; copy this to your load-path and add following to your ~/.emacs
 
 ;; (setq racer-cmd "/your/path/to/bin/racer")
@@ -8,22 +15,42 @@
 ;;             (add-to-list 'ac-sources 'ac-source-racer)
 ;;             ))
 
-(defvar racer-cmd "/home/pld/src/rust/racer/bin/racer")
-(defvar rust-srcpath "/usr/local/src/rust/src")
+(defvar racer-cmd "/Users/wangshuyu/github/racer/target/release/racer")
+(defvar rust-srcpath "/Users/wangshuyu/github/rust/src/")
 
 ;;; rust-mode no longer requires cl, so am putting it here for now (this file uses 'case')
 (require 'cl)
 
-(defun racer--write-tmp-file (tmpfilename)
+(defvar racer-file-name)
+(defvar racer-tmp-file-name)
+(defvar racer-line-number)
+(defvar racer-column-number)
+(defvar racer-completion-results)
+(defvar racer-start-pos)
+(defvar racer-end-pos)
+
+(defun racer-get-line-number ()
+  ; for some reason if the current-column is 0, then the linenumber is off by 1
+  (if (= (current-column) 0)
+      (1+ (count-lines 1 (point)))
+    (count-lines 1 (point))))
+
+(defun racer--write-tmp-file (tmp-file-name)
+  "Write the racer temporary file to `TMP-FILE-NAME'."
     (push-mark)
-    (write-region nil nil tmpfilename))
+    (setq racer-file-name (buffer-file-name))
+    (setq racer-tmp-file-name tmp-file-name)
+    (setq racer-line-number (racer-get-line-number))
+    (setq racer-column-number (current-column))
+    (setq racer-completion-results `())
+    (write-region nil nil tmp-file-name nil 0))
 
 (defun racer--tempfilename ()
   (concat temporary-file-directory (file-name-nondirectory (buffer-file-name)) ".racertmp"))
 
 (defun racer--candidates ()
   (setenv "RUST_SRC_PATH" rust-srcpath)
-  (let ((tmpfilename (racer--tempfilename)))
+  (let ((tmpfilename (concat (buffer-file-name) ".racertmp")))
     (racer--write-tmp-file tmpfilename)
     (unwind-protect
         (progn
@@ -42,7 +69,7 @@
 
 (defun racer--prefix ()
   (setenv "RUST_SRC_PATH" rust-srcpath)
-  (let ((tmpfilename (racer--tempfilename)))
+  (let ((tmpfilename (concat (buffer-file-name) ".racertmp")))
     (racer--write-tmp-file tmpfilename)
     (unwind-protect
         (progn

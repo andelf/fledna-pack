@@ -1,0 +1,10 @@
+# -*- coding: utf-8 -*-
+# name: implfmt
+# contributor: andelf <andelf@gmail.com>
+# --
+impl fmt::Display for ${1:Type} {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        try!($0);
+        Ok(())
+    }
+}

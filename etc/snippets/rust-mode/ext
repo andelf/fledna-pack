@@ -1,0 +1,6 @@
+# -*- coding: utf-8 -*-
+# name: ext
+# contributor: andelf <andelf@gmail.com>
+# --
+extern crate ${1:libc};
+$0
