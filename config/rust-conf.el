@@ -74,12 +74,12 @@
 (require 'compile)
 (add-hook 'rust-mode-hook
           #'(lambda ()
-              ;; Default indentation is usually 2 spaces, changing to 4.
             (add-to-list 'ac-sources 'ac-source-files-in-current-dir)
             (electric-pair-mode t)
             (local-set-key (kbd "C-S-j") 'my-rust-newline-and-indent)
             (local-set-key (kbd "C-{") 'my-rust-brace)
             (electric-pair-mode t)
+            (set (make-local-variable 'tab-width) 2)
             ;; (add-to-list 'ac-sources 'ac-source-rust)
             (make-local-variable 'compilation-error-regexp-alist)
             (add-to-list 'compilation-error-regexp-alist-alist
