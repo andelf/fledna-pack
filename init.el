@@ -22,9 +22,9 @@
          (concat (live-pack-dir 'fledna-pack) "bin") ":"
          (getenv "PATH")))
 
-(live-set-default-darwin-font "Monaco-12")
+;;(live-set-default-darwin-font "Tsentsiu Sans Mono HG-12")
 ;;(set-default-font "-apple-Monaco-medium-normal-normal-*-*-*-*-*-m-0-iso10646-1")
-;(set-frame-font "-*-Source Sans Pro-light-normal-normal-*-*-*-*-14-p-0-iso10646-1")
+(set-frame-font "-*-Source Sans Pro-light-normal-normal-*-*-*-*-14-p-0-iso10646-1")
 ;;; pbcopy & pbpaste for Emacs
 (when (and (eq system-type 'darwin) (not window-system))
   (defun copy-from-osx ()
