@@ -22,8 +22,8 @@
          (concat (live-pack-dir 'fledna-pack) "bin") ":"
          (getenv "PATH")))
 
-(live-set-default-darwin-font "Tsentsiu Sans Mono HG-12")
-;; (live-set-default-font "Monoid-14")
+;; (live-set-default-darwin-font "Tsentsiu Sans Mono HG-16")
+(live-set-default-font "Monoid-14")
 ;; (live-set-default-font "Monaco-12")
 ;;(set-default-font "-apple-Monaco-medium-normal-normal-*-*-*-*-*-m-0-iso10646-1")
 ;;(set-frame-font "-*-Source Sans Pro-light-normal-normal-*-*-*-*-14-p-0-iso10646-1")
@@ -84,6 +84,12 @@
 (define-globalized-minor-mode my-global-linum-mode linum-mode my-linum-on)
 ;; (my-global-linum-mode 1)
 
+;;; eshell
+
+(add-hook 'shell-mode-hook 'ansi-color-for-comint-mode-on)
+(add-hook 'term-mode-hook (lambda()
+                            (setq yas-dont-activate t)
+                            (setenv "TERM" "ansi")))
 ;;; rust
 (live-load-config-file "rust-conf.el")
 
@@ -322,6 +328,11 @@
 
 ;;; set fill column
 (setq-default fill-column 120)
+
+
+(add-hook 'prog-mode-hook 'rainbow-identifiers-mode)
+
+;;; folding
 
 (when (window-system)
   (set-frame-height (selected-frame) 48)
