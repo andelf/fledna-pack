@@ -329,7 +329,7 @@
 ;;; set fill column
 (setq-default fill-column 120)
 
-
+(require 'rainbow-identifiers)
 (add-hook 'prog-mode-hook 'rainbow-identifiers-mode)
 
 ;;; folding
