@@ -332,7 +332,9 @@
 (require 'rainbow-identifiers)
 (add-hook 'prog-mode-hook 'rainbow-identifiers-mode)
 
-;;; folding
+;;; f7 to goto shell
+
+(global-set-key [f7] 'eshell)
 
 (when (window-system)
   (set-frame-height (selected-frame) 48)

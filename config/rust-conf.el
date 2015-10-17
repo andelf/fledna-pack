@@ -72,12 +72,17 @@
 
 ;; (require 'racer-autocomplete)
 (require 'compile)
+
+(require 'flymake-rust)
+(add-hook 'rust-mode-hook 'flymake-rust-load)
+
 (add-hook 'rust-mode-hook
           #'(lambda ()
             (add-to-list 'ac-sources 'ac-source-files-in-current-dir)
             (electric-pair-mode t)
             (local-set-key (kbd "C-S-j") 'my-rust-newline-and-indent)
             (local-set-key (kbd "C-{") 'my-rust-brace)
+            (local-set-key (kbd "M-RET") 'flymake-popup-current-error-menu)
             (electric-pair-mode t)
             (set (make-local-variable 'tab-width) 2)
             ;; (add-to-list 'ac-sources 'ac-source-rust)
