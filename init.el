@@ -336,6 +336,9 @@
 
 (global-set-key [f7] 'eshell)
 
+(require 'package)
+(add-hook 'haskell-mode-hook 'haskell-indentation-mode)
+
 (when (window-system)
   (set-frame-height (selected-frame) 48)
   (set-frame-width (selected-frame) 120)

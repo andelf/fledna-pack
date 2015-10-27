@@ -1,0 +1,8 @@
+# -*- coding: utf-8 -*-
+# name: pfn
+# contributor: andelf <andelf@gmail.com>
+# expand-env: ((yas/indent-line 'fixed) (yas/wrap-around-region 'nil) (cmt-start (if (string-equal comment-end "") (concat comment-start comment-start) comment-start)))
+# --
+pub fn ${1:main}() {
+    ${0:unimplemented!()}
+}
