@@ -339,6 +339,11 @@
 (require 'package)
 (add-hook 'haskell-mode-hook 'haskell-indentation-mode)
 
+
+
+(require 'pcre2el)
+(pcre-mode t)
+
 (when (window-system)
   (set-frame-height (selected-frame) 48)
   (set-frame-width (selected-frame) 120)
