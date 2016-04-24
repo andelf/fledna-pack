@@ -1,11 +1,11 @@
 ;;; swift-mode.el --- Major-mode for Apple's Swift programming language. -*- lexical-binding: t -*-
 
-;; Copyright (C) 2014 Chris Barrett, Bozhidar Batsov, Arthur Evstifeev
+;; Copyright (C) 2014-2016 Chris Barrett, Bozhidar Batsov, Arthur Evstifeev
 
 ;; Authors: Chris Barrett <chris.d.barrett@me.com>
 ;;       Bozhidar Batsov <bozhidar@batsov.com>
 ;;       Arthur Evstifeev <lod@pisem.net>
-;; Version: 0.4.0-cvs
+;; Version: 0.5.0-snapshot
 ;; Package-Requires: ((emacs "24.4"))
 ;; Keywords: languages swift
 
@@ -32,13 +32,7 @@
 
 (require 'rx)
 (require 'comint)
-
-(eval-and-compile
-  ;; Added in Emacs 24.3
-  (unless (fboundp 'setq-local)
-    (defmacro setq-local (var val)
-      "Set variable VAR to value VAL in current buffer."
-      (list 'set (list 'make-local-variable (list 'quote var)) val))))
+(require 'cl-lib)
 
 (defgroup swift nil
   "Configuration for swift-mode."
@@ -60,6 +54,13 @@
   :group 'swift
   :type 'integer
   :package-version '(swift-mode "0.3.0"))
+
+(defcustom swift-indent-hanging-comma-offset nil
+  "Defines the indentation offset for hanging comma."
+  :group 'swift
+  :type '(choice (const :tag "Use default relative formatting" nil)
+                 (integer :tag "Custom offset"))
+  :package-version '(swift-mode "0.4.0"))
 
 (defcustom swift-repl-executable
   "xcrun swift"
@@ -87,20 +88,19 @@
        (decl (decl ";" decl))
        (decl (let-decl) (var-decl))
        (let-decl
-        ("let" id ":" type)
-        ("let" id "=" exp)
-        ("let" id ":" type "=" exp))
+        ("let" decl-exp)
+        ("let" decl-exp "=" exp))
        (var-decl
-        ("var" id ":" type)
-        ("var" id "=" exp)
-        ("var" id ":" type "=" exp))
+        ("var" decl-exp)
+        ("var" decl-exp "=" exp))
 
        (top-level-sts (top-level-st) (top-level-st ";" top-level-st))
        (top-level-st
         ("import" type)
         (decl)
         ("ACCESSMOD" "class" class-decl-exp "{" class-level-sts "}")
-        ("ACCESSMOD" "protocol" class-decl-exp "{" protocol-level-sts "}"))
+        ("ACCESSMOD" "protocol" class-decl-exp "{" protocol-level-sts "}")
+        )
 
        (class-level-sts (class-level-st) (class-level-st ";" class-level-st))
        (class-level-st
@@ -123,7 +123,6 @@
        (insts (inst) (insts ";" insts))
        (inst (decl)
              (exp "=" exp)
-             (tern-exp)
              (in-exp)
              (dot-exp)
              (dot-exp "{" closure "}")
@@ -132,32 +131,35 @@
              ("enum" decl-exp "{" enum-body "}")
              ("switch" exp "{" switch-body "}")
              (if-clause)
+             (guard-statement)
              ("for" for-head "{" insts "}")
              ("while" exp "{" insts "}"))
 
        (dot-exp (id "." id))
 
        (method-call (dot-exp "(" method-args ")"))
-       (method-args (method-arg) (method-arg "," method-arg))
-       (method-arg (exp "," "{" closure "}") (exp))
+       (method-args (method-arg) (method-args "," method-args))
+       (method-arg (id "{" closure "}") (exp))
 
-       (exp (op-exp)
-            ("[" decl-exps "]"))
+       (exp ("[" decl-exps "]"))
        (in-exp (id "in" exp))
        (guard-exp (exp "where" exp))
-       (op-exp (exp "OP" exp))
-       (tern-exp (op-exp "?" exp ":" exp))
 
        (enum-case ("ecase" assign-exp)
                   ("ecase" "(" type ")"))
        (enum-cases (enum-case) (enum-case ";" enum-case))
        (enum-body (enum-cases) (insts))
 
-       (case-exps (exp) (guard-exp))
-       (case (case-exps ":" insts))
+       (case-exps (exp)
+                  (guard-exp)
+                  (case-exps "," case-exps))
+       (case (case-exps "case-:" insts))
        (switch-body (case) (case "case" case))
 
        (for-head (in-exp) (op-exp) (for-head ";" for-head))
+
+       (guard-conditional (exp) (let-decl) (var-decl))
+       (guard-statement ("guard" guard-conditional "elseguard" "{" insts "}"))
 
        (if-conditional (exp) (let-decl))
        (if-body ("if" if-conditional "{" insts "}"))
@@ -167,8 +169,8 @@
 
        (closure (insts) (exp "in" insts) (exp "->" id "in" insts)))
      ;; Conflicts
-     '((nonassoc "{") (assoc "in") (assoc ",") (assoc ";") (assoc ":") (right "="))
-     '((assoc "in") (assoc "where") (assoc "OP"))
+     '((nonassoc "{") (assoc "in") (assoc ",") (assoc ";") (right "=") (right ":"))
+     '((assoc "in") (assoc "where"))
      '((assoc ";") (assoc "ecase"))
      '((assoc "case")))
 
@@ -176,11 +178,13 @@
      '(
        (right "*=" "/=" "%=" "+=" "-=" "<<=" ">>=" "&="
               "^=" "|=" "&&=" "||=" "=")                       ;; Assignment (Right associative, precedence level 90)
+       (right "?" ":")                                         ;; Ternary Conditional (Right associative, precedence level 100)
        (left "||")                                             ;; Disjunctive (Left associative, precedence level 110)
        (left "&&")                                             ;; Conjunctive (Left associative, precedence level 120)
+       (right "??")                                            ;; Nil Coalescing (Right associativity, precedence level 120)
        (nonassoc "<" "<=" ">" ">=" "==" "!=" "===" "!==" "~=") ;; Comparative (No associativity, precedence level 130)
-       (nonassoc "is" "as" "as?")                              ;; Cast (No associativity, precedence level 132)
-       (nonassoc ".." "...")                                   ;; Range (No associativity, precedence level 135)
+       (nonassoc "is" "as" "as!" "as?")                        ;; Cast (No associativity, precedence level 132)
+       (nonassoc "..<" "...")                                  ;; Range (No associativity, precedence level 135)
        (left "+" "-" "&+" "&-" "|" "^")                        ;; Additive (Left associative, precedence level 140)
        (left "*" "/" "%" "&*" "&/" "&%" "&")                   ;; Multiplicative (Left associative, precedence level 150)
        (nonassoc "<<" ">>")                                    ;; Exponentiative (No associativity, precedence level 160)
@@ -196,16 +200,19 @@
              value)
     value))
 
+(defvar swift-smie--operators
+  '("*=" "/=" "%=" "+=" "-=" "<<=" ">>=" "&=" "^=" "|=" "&&=" "||="
+   "<" "<=" ">" ">=" "==" "!=" "===" "!==" "~=" "||" "&&"
+   "is" "as" "as!" "as?" "..<" "..."
+   "+" "-" "&+" "&-" "|" "^"
+   "*" "/" "%" "&*" "&/" "&%" "&"
+   "<<" ">>" "??"))
+
 (defvar swift-smie--operators-regexp
-  (regexp-opt '("*=" "/=" "%=" "+=" "-=" "<<=" ">>=" "&=" "^=" "|=" "&&=" "||="
-                "<" "<=" ">" ">=" "==" "!=" "===" "!==" "~=" "||" "&&"
-                "is" "as" "as?" ".." "..."
-                "+" "-" "&+" "&-" "|" "^"
-                "*" "/" "%" "&*" "&/" "&%" "&"
-                "<<" ">>" "??")))
+  (regexp-opt swift-smie--operators))
 
 (defvar swift-smie--decl-specifier-regexp
-  "\\(?1:class\\|mutating\\|override\\|static\\|unowned\\|weak\\)\\(?:[[:space:]]*func\\)")
+  "\\(?1:mutating\\|override\\|static\\|unowned\\|weak\\)")
 
 (defvar swift-smie--access-modifier-regexp
   (regexp-opt '("private" "public" "internal")))
@@ -220,7 +227,7 @@
              ;; ??, is? and as? are operators
              (looking-back "[?][?]\\|as[?]\\|is[?]" (- (point) 3) t)
              ;; "in" operator in closure
-             (looking-back "in" (- (point) 2) t)
+             (looking-back "\\bin" (- (point) 3) t)
              ;; Characters placed on the second line in multi-line expression
              (save-excursion
                (forward-comment (buffer-size))
@@ -236,28 +243,54 @@
                   (not (looking-back "[[:upper:]]>" (- (point) 2) t)))
              ))))
 
+(defun swift-smie--forward-token-debug ()
+  (let ((token (swift-smie--forward-token)))
+    (unless (equal token "")
+      (cl-assert (equal token
+                     (save-excursion (swift-smie--backward-token))) t))
+    token
+    ))
+
+(defun swift-smie--backward-token-debug ()
+  (let ((token (swift-smie--backward-token)))
+    (unless (equal token "")
+      (cl-assert (equal token
+                     (save-excursion (swift-smie--forward-token))) t))
+      token
+    ))
+
+(defconst swift-smie--lookback-max-lines -2
+  "Max number of lines 'looking-back' allowed to scan.
+In some cases we can't avoid reverse lookup and this operation can be slow.
+We try to constraint those lookups by reasonable number of lines.")
+
 (defun swift-smie--forward-token ()
   (skip-chars-forward " \t")
   (cond
    ((and (looking-at "\n\\|\/\/") (swift-smie--implicit-semi-p))
     (if (eolp) (forward-char 1) (forward-comment 1))
     ";")
-
+   (t
+    (forward-comment (point))
+    (cond
    ((looking-at "{") (forward-char 1) "{")
    ((looking-at "}") (forward-char 1) "}")
 
    ((looking-at ",") (forward-char 1) ",")
-   ((looking-at ":") (forward-char 1) ":")
+   ((looking-at ":") (forward-char 1)
+    ;; look-back until "case", "default", ":", "{", ";"
+    (if (looking-back "\\(case[\n\t ][^:{;]+\\|default[\n\t ]*\\):")
+        "case-:"
+      ":"))
 
    ((looking-at "->") (forward-char 2) "->")
 
    ((looking-at "<") (forward-char 1)
-    (if (looking-at "[[:upper:]]") "<T" "OP"))
-   ((looking-at ">") (forward-char 1)
-    (if (looking-back "[[:space:]]>" 2 t) "OP" "T>"))
+    (if (looking-at "[[:upper:]]") "<T" "<"))
 
-   ((looking-at swift-smie--operators-regexp)
-    (goto-char (match-end 0)) "OP")
+   ((looking-at ">[?!]?")
+    (goto-char (match-end 0))
+    (if (looking-back "[[:space:]]>" 2 t) ">" "T>"))
 
    ((looking-at swift-smie--decl-specifier-regexp)
     (goto-char (match-end 1)) "DECSPEC")
@@ -277,7 +310,12 @@
           (if (looking-at "\\([\n\t ]\\|.\\)+?\\(where.*[,]\\|:\\)")
               "case"
             "ecase"))
+         ((equal tok "else")
+          (if (looking-back "\\(guard.*\\)" (line-beginning-position) t)
+              "elseguard"
+            "else"))
          (t tok))))
+   ))
    ))
 
 (defun swift-smie--backward-token ()
@@ -292,19 +330,24 @@
      ((eq (char-before) ?\}) (backward-char 1) "}")
 
      ((eq (char-before) ?,) (backward-char 1) ",")
-     ((eq (char-before) ?:) (backward-char 1) ":")
+     ((eq (char-before) ?:) (backward-char 1)
+      ;; look-back until "case", "default", ":", "{", ";"
+      (if (looking-back "\\(case[\n\t ][^:{;]+\\|default[\n\t ]*\\)")
+          "case-:"
+        ":"))
 
      ((looking-back "->" (- (point) 2) t)
       (goto-char (match-beginning 0)) "->")
 
      ((eq (char-before) ?<) (backward-char 1)
-      (if (looking-at "<[[:upper:]]") "<T" "OP"))
+      (if (looking-at "<[[:upper:]]") "<T" "<"))
      ((looking-back ">[?!]?" (- (point) 2) t)
       (goto-char (match-beginning 0))
-      (if (looking-back "[[:space:]]" 1 t) "OP" "T>"))
+      (if (looking-back "[[:space:]]" 1 t) ">" "T>"))
 
-     ((looking-back swift-smie--operators-regexp (- (point) 3) t)
-      (goto-char (match-beginning 0)) "OP")
+     ((looking-back (regexp-opt swift-mode--type-decl-keywords) (- (point) 9) t)
+      (goto-char (match-beginning 0))
+      (match-string-no-properties 0))
 
      ((looking-back swift-smie--decl-specifier-regexp (- (point) 8) t)
       (goto-char (match-beginning 1)) "DECSPEC")
@@ -324,6 +367,10 @@
             (if (looking-at "\\([\n\t ]\\|.\\)+?\\(where.*[,]\\|:\\)")
                 "case"
               "ecase"))
+           ((equal tok "else")
+            (if (looking-back "\\(guard.*\\)" (line-beginning-position) t)
+                "elseguard"
+              "else"))
            (t tok))))
      )))
 
@@ -336,19 +383,16 @@
      (cond
       ;; Rule for ternary operator in
       ;; assignment expression.
-      ;; Static indentation relatively to =
-      ((smie-rule-parent-p "=") 2)
-      ;; Rule for the case statement.
-      ((smie-rule-parent-p "case") swift-indent-offset)
+      ((and (smie-rule-parent-p "?") (smie-rule-bolp)) 0)
+      ((smie-rule-parent-p ",") (smie-rule-parent swift-indent-offset))
       ;; Rule for the class definition.
       ((smie-rule-parent-p "class") (smie-rule-parent swift-indent-offset))))
 
-    (`(:after . "{")
-     (if (smie-rule-parent-p "switch")
+    ;; Indentation rules for switch statements
+    (`(:before . "case")
+     (if (smie-rule-parent-p "{")
          (smie-rule-parent swift-indent-switch-case-offset)))
-    (`(:before . ";")
-     (if (smie-rule-parent-p "case")
-         (smie-rule-parent swift-indent-offset)))
+    (`(:before . "case-:") (smie-rule-parent swift-indent-offset))
 
     ;; Apply swift-indent-multiline-statement-offset only if
     ;; - if is a first token on the line
@@ -360,18 +404,17 @@
 
     ;; Apply swift-indent-multiline-statement-offset if
     ;; operator is the last symbol on the line
-    (`(:before . "OP")
+    (`(:after . ,(pred (lambda (token)
+                          (member token swift-smie--operators))))
      (when (and (smie-rule-hanging-p)
-                (not (smie-rule-parent-p "OP")))
-       (if (smie-rule-parent-p "{")
-           (+ swift-indent-offset swift-indent-multiline-statement-offset)
-         swift-indent-multiline-statement-offset)))
+                (not (apply 'smie-rule-parent-p
+                            (append swift-smie--operators '("?" ":" "=")))))
+       swift-indent-multiline-statement-offset
+       ))
 
-    ;; Indent second line of the multi-line class
-    ;; definitions with swift-indent-offset
     (`(:before . ",")
-     (if (smie-rule-parent-p "class")
-       (smie-rule-parent swift-indent-offset)))
+     (if (and swift-indent-hanging-comma-offset (smie-rule-parent-p "class" "case"))
+         (smie-rule-parent swift-indent-hanging-comma-offset)))
 
     ;; Disable unnecessary default indentation for
     ;; "func" and "class" keywords
@@ -384,8 +427,12 @@
        (smie-rule-parent 0)))
 
     (`(:after . "(")
-     (if (smie-rule-parent-p "(") 0
-       (smie-rule-parent swift-indent-offset)))
+     (cond
+      ((smie-rule-parent-p "(") 0)
+      ((and (smie-rule-parent-p "." "func")
+            (not (smie-rule-hanging-p))) 1)
+      (t (smie-rule-parent swift-indent-offset))))
+
     (`(:before . "(")
      (cond
       ((smie-rule-next-p "[") (smie-rule-parent))
@@ -397,6 +444,7 @@
       ((smie-rule-prev-p "->") swift-indent-offset)
       ((smie-rule-parent-p "[") (smie-rule-parent swift-indent-offset))
       ((smie-rule-parent-p "{") nil)
+      ((smie-rule-parent-p "class-{") nil)
       (t (smie-rule-parent))))
     (`(:after . "->") (smie-rule-parent swift-indent-offset))
     ))
@@ -420,17 +468,18 @@
 
 (defvar swift-mode--statement-keywords
   '("break" "case" "continue" "default" "do" "else" "fallthrough"
-    "if" "in" "for" "return" "switch" "where" "while"))
+    "if" "in" "for" "return" "switch" "where" "while" "guard"))
 
 (defvar swift-mode--contextual-keywords
   '("associativity" "didSet" "get" "infix" "inout" "left" "mutating" "none"
     "nonmutating" "operator" "override" "postfix" "precedence" "prefix" "right"
     "set" "unowned" "unowned(safe)" "unowned(unsafe)" "weak" "willSet" "convenience"
-    "required" "dynamic" "final" "lazy" "optional" "private" "public" "internal" "try" "catch" "throws"))
+    "required" "dynamic" "final" "lazy" "optional" "private" "public" "internal"))
 
 (defvar swift-mode--attribute-keywords
   '("class_protocol" "exported" "noreturn"
-    "NSCopying" "NSManaged" "objc" "auto_closure"
+    "NSCopying" "NSManaged" "objc" "autoclosure"
+    "available" "noescape" "nonobjc" "NSApplicationMain" "testable" "UIApplicationMain" "warn_unused_result" "convention"
     "IBAction" "IBDesignable" "IBInspectable" "IBOutlet"))
 
 (defvar swift-mode--keywords
@@ -574,76 +623,75 @@
 
 ;;; Flycheck
 
-(eval-after-load 'flycheck
-  (lambda ()
-    (flycheck-def-option-var flycheck-swift-sdk-path nil swift
-       "A path to the targeted SDK"
-       :type '(choice (const :tag "Don't link against sdk" nil)
-                      (string :tag "Targeted SDK path"))
-       :safe #'stringp)
+(with-eval-after-load 'flycheck
+  (flycheck-def-option-var flycheck-swift-sdk-path nil swift
+     "A path to the targeted SDK"
+     :type '(choice (const :tag "Don't link against sdk" nil)
+                    (string :tag "Targeted SDK path"))
+     :safe #'stringp)
 
-     (flycheck-def-option-var flycheck-swift-linked-sources nil swift
-       "Source files path to link against. Can be glob, i.e. *.swift"
-       :type '(choice (const :tag "Don't use linked sources" nil)
-                      (string :tag "Linked Sources"))
-       :safe #'stringp)
+   (flycheck-def-option-var flycheck-swift-linked-sources nil swift
+     "Source files path to link against. Can be glob, i.e. *.swift"
+     :type '(choice (const :tag "Don't use linked sources" nil)
+                    (string :tag "Linked Sources"))
+     :safe #'stringp)
 
-     (flycheck-def-option-var flycheck-swift-framework-search-paths nil swift
-       "A list of framework search paths"
-       :type '(repeat (directory :tag "Include directory"))
-       :safe #'flycheck-string-list-p)
+   (flycheck-def-option-var flycheck-swift-framework-search-paths nil swift
+     "A list of framework search paths"
+     :type '(repeat (directory :tag "Include directory"))
+     :safe #'flycheck-string-list-p)
 
-     (flycheck-def-option-var flycheck-swift-cc-include-search-paths nil swift
-       "A list of include file search paths to pass to the Objective C compiler"
-       :type '(repeat (directory :tag "Include directory"))
-       :safe #'flycheck-string-list-p)
+   (flycheck-def-option-var flycheck-swift-cc-include-search-paths nil swift
+     "A list of include file search paths to pass to the Objective C compiler"
+     :type '(repeat (directory :tag "Include directory"))
+     :safe #'flycheck-string-list-p)
 
-     (flycheck-def-option-var flycheck-swift-target "i386-apple-ios8.1" swift
-       "Target used by swift compiler"
-       :type '(choice (const :tag "Don't specify target" nil)
-                      (string :tag "Build target"))
-       :safe #'stringp)
+   (flycheck-def-option-var flycheck-swift-target "i386-apple-ios8.1" swift
+     "Target used by swift compiler"
+     :type '(choice (const :tag "Don't specify target" nil)
+                    (string :tag "Build target"))
+     :safe #'stringp)
 
-     (flycheck-def-option-var flycheck-swift-import-objc-header nil swift
-       "Objective C header file to import, if any"
-       :type '(choice (const :tag "Don't specify objective C bridging header" nil)
-                      (string :tag "Objective C bridging header path"))
-       :safe #'stringp)
+   (flycheck-def-option-var flycheck-swift-import-objc-header nil swift
+     "Objective C header file to import, if any"
+     :type '(choice (const :tag "Don't specify objective C bridging header" nil)
+                    (string :tag "Objective C bridging header path"))
+     :safe #'stringp)
 
-     (flycheck-define-checker swift
-       "Flycheck plugin for for Apple's Swift programming language."
-       :command ("swift"
-                 "-frontend" "-parse"
-                 (option "-sdk" flycheck-swift-sdk-path)
-                 (option-list "-F" flycheck-swift-framework-search-paths)
-                 ;; Swift compiler will complain about redeclaration
-                 ;; if we will include original file along with
-                 ;; temporary source file created by flycheck.
-                 ;; We also don't want a hidden emacs interlock files.
-                 (eval
-                  (let (source file)
-                    (when flycheck-swift-linked-sources
-                      (setq source (car (flycheck-substitute-argument 'source 'swift)))
-                      (setq file (file-name-nondirectory source))
-                      (cl-remove-if-not
-                       #'(lambda (path)
-                           (and
-                            (eq (string-match ".#" path) nil)
-                            (eq (string-match file path) nil)))
-                       (file-expand-wildcards flycheck-swift-linked-sources)))))
-                 (option "-target" flycheck-swift-target)
-                 (option "-import-objc-header" flycheck-swift-import-objc-header)
-                 (eval
-                  (mapcan
-                   #'(lambda (path) (list "-Xcc" (concat "-I" path)))
-                   flycheck-swift-cc-include-search-paths))
-                 "-primary-file" source)
-       :error-patterns
-       ((error line-start (file-name) ":" line ":" column ": "
-               "error: " (message) line-end)
-        (warning line-start (file-name) ":" line ":" column ": "
-                 "warning: " (message) line-end))
-       :modes swift-mode)))
+   (flycheck-define-checker swift
+     "Flycheck plugin for for Apple's Swift programming language."
+     :command ("swift"
+               "-frontend" "-parse"
+               (option "-sdk" flycheck-swift-sdk-path)
+               (option-list "-F" flycheck-swift-framework-search-paths)
+               ;; Swift compiler will complain about redeclaration
+               ;; if we will include original file along with
+               ;; temporary source file created by flycheck.
+               ;; We also don't want a hidden emacs interlock files.
+               (eval
+                (let (source file)
+                  (when flycheck-swift-linked-sources
+                    (setq source (car (flycheck-substitute-argument 'source 'swift)))
+                    (setq file (file-name-nondirectory source))
+                    (cl-remove-if-not
+                     #'(lambda (path)
+                         (and
+                          (eq (string-match ".#" path) nil)
+                          (eq (string-match file path) nil)))
+                     (file-expand-wildcards flycheck-swift-linked-sources)))))
+               (option "-target" flycheck-swift-target)
+               (option "-import-objc-header" flycheck-swift-import-objc-header)
+               (eval
+                (cl-mapcan
+                 #'(lambda (path) (list "-Xcc" (concat "-I" path)))
+                 flycheck-swift-cc-include-search-paths))
+               "-primary-file" source)
+     :error-patterns
+     ((error line-start (file-name) ":" line ":" column ": "
+             "error: " (message) line-end)
+      (warning line-start (file-name) ":" line ":" column ": "
+               "warning: " (message) line-end))
+     :modes swift-mode))
 
 ;;; REPL
 
@@ -706,7 +754,7 @@ You can send text to the REPL process from other buffers containing source.
   (let ((table (make-syntax-table)))
 
     ;; Operators
-    (dolist (i '(?+ ?- ?* ?/ ?& ?| ?^ ?! ?< ?> ?~))
+    (dolist (i '(?+ ?- ?* ?/ ?& ?| ?^ ?< ?> ?~))
       (modify-syntax-entry i "." table))
 
     ;; Strings
@@ -715,7 +763,9 @@ You can send text to the REPL process from other buffers containing source.
 
     ;; Additional symbols
     (modify-syntax-entry ?_ "w" table)
-    (modify-syntax-entry ?: "_" table)
+    (modify-syntax-entry ?? "_" table)
+    (modify-syntax-entry ?! "_" table)
+    (modify-syntax-entry ?: "." table)
 
     ;; Comments
     (modify-syntax-entry ?/  ". 124b" table)
@@ -727,20 +777,8 @@ You can send text to the REPL process from other buffers containing source.
     (modify-syntax-entry ?\) ")(" table)
     (modify-syntax-entry ?\[ "(]" table)
     (modify-syntax-entry ?\] ")[" table)
-
-    ;; HACK: This is not a correct syntax table definition
-    ;; for the braces, but it allows us disable smie indentation
-    ;; based on  syntax-table. Default behaviour doesn't work with
-    ;; closures in method arguments. For example:
-    ;;
-    ;; foo.bar(10,
-    ;;         closure: {
-    ;;         })
-    ;;
-    ;; With enabled syntax table, smie doesn't respect closing brace, so
-    ;; it's impossible to provide custom indentation rules
-    (modify-syntax-entry ?\{ "w" table)
-    (modify-syntax-entry ?\} "w" table)
+    (modify-syntax-entry ?\{ "(}" table)
+    (modify-syntax-entry ?\} "){" table)
 
     table))
 
