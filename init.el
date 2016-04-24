@@ -22,7 +22,7 @@
          (concat (live-pack-dir 'fledna-pack) "bin") ":"
          (getenv "PATH")))
 
-;; (live-set-default-darwin-font "Tsentsiu Sans Mono HG-16")
+;; (live-set-default-darwin-font "Tsentsiu Sans Mono HG-14")
 (live-set-default-font "Monoid-14")
 ;; (live-set-default-font "Monaco-12")
 ;;(set-default-font "-apple-Monaco-medium-normal-normal-*-*-*-*-*-m-0-iso10646-1")
@@ -290,6 +290,8 @@
 
 ;;; imenu
 ;;; C-x C-i
+
+(setq org-startup-indented t)
 
 ;;; speedbar
 ;; (defconst my-speedbar-buffer-name "SPEEDBAR")
