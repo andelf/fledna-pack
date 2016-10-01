@@ -3,7 +3,7 @@
 ;; Created     : Wed May 20 10:08:03 2015 by ShuYu Wang
 ;; Copyright   : Feather Workshop (c) 2015
 ;; Description : racer auto-complete source
-;; Time-stamp: <2015-05-20 10:08:18 andelf>
+;; Time-stamp: <2016-09-08 00:05:47 andelf>
 
 ;;; copy this to your load-path and add following to your ~/.emacs
 
@@ -87,7 +87,7 @@
 (ac-define-source racer
   '((candidates . racer--candidates)
     (prefix . racer--prefix)
-    (requires . 0)
+    (requires . 2)
     (cache)
     (symbol . "R")))
 

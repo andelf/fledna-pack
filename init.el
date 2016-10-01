@@ -159,6 +159,7 @@
           ;;;  'swift-mode:indent-on-parentheses)
   (local-set-key (kbd "{") 'my-swift-brace)
   (set (make-local-variable 'tab-width) 2)
+  (set (make-local-variable 'swift-indent-offset) 2)
   (set (make-local-variable 'electric-indent-chars) '(?\n ?\: ?\{)))
 
 (add-hook 'swift-mode-hook 'my-swift-mode-hook)
@@ -276,7 +277,7 @@
 (setq ac-ignore-case 'smart)
 
 ;;(define-key ac-complete-mode-map "<return>"   'nil)
-(define-key ac-complete-mode-map "RET"        'nil)
+; (define-key ac-complete-mode-map "RET"        'nil)
 
 
 ;;; xcscope
