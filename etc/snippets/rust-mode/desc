@@ -5,5 +5,4 @@
 # --
 #![desc = "${1:A hello world Rust package.}"]
 #![license = "MIT"]
-
 $0

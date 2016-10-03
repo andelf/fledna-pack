@@ -6,5 +6,4 @@
 #![crate_id = "${1:main}#0.1"]
 #![crate_type = "rlib"]
 #![crate_type = "dylib"]
-
 $0
