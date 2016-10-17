@@ -1,8 +1,0 @@
-# name: public ... Main(...) {...}
-# contributor: Andelf
-# --
-public static int Main(string[] args)
-{
-    $0
-    return 0;
-}

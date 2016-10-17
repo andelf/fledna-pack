@@ -1,7 +1,0 @@
-# name: public class ...
-# contributor: Andelf
-# --
-public class ${1:`(capitalize (file-name-nondirectory (file-name-sans-extension (buffer-file-name))))`}
-{
-    $0
-}

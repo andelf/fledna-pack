@@ -1,7 +1,0 @@
-# name: foreach
-# contributor: Andelf
-# --
-foreach(${1:string s} in ${2:args})
-{
-    $0
-}
